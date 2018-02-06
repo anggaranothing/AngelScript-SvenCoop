@@ -449,89 +449,24 @@ namespace INI
 					// Update/Insert global section first
 					if( cachedDic.exists( GLOBAL_SECTION ) )
 					{
-						cachedDic.get( GLOBAL_SECTION, @lastSection );
-
-						// No more left data?
-						if( lastSection !is null && lastSection.getSize() <= 0 )
-						{
-							// Force remove global section from cached dictionary
-							cachedDic.delete( sectionName );
-							@lastSection = null;
-
-							// Step back
-							--lastPos;
-
-							continue;
-						}
-
 						// Set section name
 						sectionName = GLOBAL_SECTION;
-
-						// Parse this line
-						returnCode = ReadProperty( buffer, propKey, propValue );
-
-						// We got parseable line here!
-						if( returnCode >= PROPERTY_RETURN_VALID )
+						// Get global section dictionary
+						cachedDic.get( GLOBAL_SECTION, @lastSection );
+					}
+					else
+					{
+						// is this section?
+						string temp;
+						if( ReadSection( buffer, temp ) )
 						{
-							// property exists
-							if( lastSection.get(propKey, newValue) )
-							{
-								// new value
-								if( newValue != propValue )
-								{
-									newValue = propKey +" = "+ newValue +"\n";
-									streamHandle.szBuffers[lastPos] = newValue;
-								}
-							}
+							// Retrieve this section
+							sectionName = temp;
+							cachedDic.get( sectionName, @lastSection );
 
-							// Clear cache
-							// delete this property from cached dict
-							lastSection.delete( propKey );
-						}
-						// Comment line?
-						else if( returnCode == PROPERTY_RETURN_COMMENT )
-						{
+							// Next!
 							continue;
 						}
-						// Global section is still exists?
-						else
-						if( lastSection !is null )
-						{
-							// Section ended?
-							if( returnCode == PROPERTY_RETURN_END )
-							{
-								// Set pos one step back
-								--lastPos;
-							}
-
-							// Insert all left data
-							array<string> gsKeys = lastSection.getKeys();
-							for( uint s = 0; s < gsKeys.length(); s++ )
-							{
-								string key  = gsKeys[s];
-								string prop = key +" = "+ string( lastSection[key] ) +"\n";
-								streamHandle.szBuffers.insertAt( lastPos, prop );
-							}
-
-							// Force remove global section from cached dictionary
-							cachedDic.delete( sectionName );
-							@lastSection = null;
-						}
-
-						// Check global again...
-						continue;
-					}
-
-					// is this section?
-					string temp;
-					if( ReadSection( buffer, temp ) )
-					{
-						// Retrieve this section
-						sectionName = temp;
-						cachedDic.get( sectionName, @lastSection );
-
-						// Next!
-						continue;
 					}
 
 					// No more left data?
