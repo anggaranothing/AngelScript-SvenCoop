@@ -4,7 +4,7 @@
  * An Angelscript library to read, parse, store, and backup INI file.
  * Mainly created for parsing AMXX plugin configs.
  * 
- * Pros :
+ * Pro(s) :
  * 1. Support section-less properties,
  * 2. Support comment lines,
  * 3. Support whitespaces to both property key and value,
@@ -15,7 +15,7 @@
  * 8. Since its stored in dictionary objects, multiple file reading is not needed.
  *
  *
- * Consts :
+ * Const(s) :
  * 1. Multiple property values is not supported (last value is used instead).
  *
  *
@@ -168,7 +168,7 @@ namespace INI
 			return string( section[szPropertyKey] );
 		}
 
-		protected void setClassname()
+		protected void setClassname() override
 		{
 			_classname = "INI";
 		}
@@ -178,9 +178,7 @@ namespace INI
 		 */
 		Parser()
 		{
-			setClassname();
-
-			@_file = null;
+			super();
 		}
 
 		/**
@@ -188,11 +186,9 @@ namespace INI
 		 *
 		 * @param szFilepath		File input path.
 		 */
-		Parser( const string& in szFilepath )
+		Parser( const string& in szFilename )
 		{
-			setClassname();
-
-			load( szFilepath );
+			super( szFilename );
 		}
 
 		/**
@@ -202,9 +198,7 @@ namespace INI
 		 */
 		Parser( File@ file )
 		{
-			setClassname();
-
-			load( @file );
+			super( @file );
 		}
 
 		/**
@@ -683,6 +677,15 @@ namespace INI
 
 			return PROPERTY_RETURN_VALID;
 		}
+
+		/**
+		 * Removes all parsed data.
+		 */
+		void clean() override
+		{
+			m_dictSec.deleteAll();
+			m_dictSec.set( GLOBAL_SECTION, dictionary={} );
+		}
 	}
 
 	class FileStream : Persistable
@@ -697,7 +700,7 @@ namespace INI
 			get { return szBuffers; }
 		}
 
-		protected void setClassname()
+		protected void setClassname() override
 		{
 			_classname = "FileStream";
 		}
@@ -707,7 +710,7 @@ namespace INI
 		 */
 		FileStream()
 		{
-			setClassname();
+			super();
 		}
 
 		/**
@@ -717,9 +720,7 @@ namespace INI
 		 */
 		FileStream( const string& in szFilename )
 		{
-			setClassname();
-
-			load( szFilename );
+			super( szFilename );
 		}
 
 		/**
@@ -729,9 +730,7 @@ namespace INI
 		 */
 		FileStream( File@ file )
 		{
-			setClassname();
-
-			load( @file );
+			super( @file );
 		}
 
 		/**
@@ -809,6 +808,14 @@ namespace INI
 
 			return true;
 		}
+
+		/**
+		 * Removes all parsed data.
+		 */
+		void clean() override
+		{
+			szBuffers.resize(0);
+		}
 	}
 
 	abstract class Persistable
@@ -817,6 +824,53 @@ namespace INI
 		protected File@  _file = null;
 		protected string _fileInputPath;
 		protected string _fileOutputPath;
+
+		protected void setClassname()
+		{
+			_classname = "Persistable";
+		}
+
+		/**
+		 * Default constructor.
+		 */
+		Persistable()
+		{
+			setClassname();
+			@_file = null;
+		}
+
+		/**
+		 * Constructor.
+		 *
+		 * @param szFilepath		File input path.
+		 */
+		Persistable( const string& in szFilename )
+		{
+			setClassname();
+
+			load( szFilename );
+		}
+
+		/**
+		 * Constructor.
+		 *
+		 * @param file		File@ handle to input.
+		 */
+		Persistable( File@ file )
+		{
+			setClassname();
+
+			load( @file );
+		}
+
+		/**
+		 * Default destructor.
+		 */
+		~Persistable()
+		{
+			this.close();
+			this.clean();
+		}
 
 		/**
 		 * Gets file handle.
@@ -936,7 +990,10 @@ namespace INI
 		void close()
 		{
 			if( _file !is null )
-			_file.Close();
+			{
+				_file.Close();
+				@_file = null;
+			}
 		}
 
 		/**
@@ -972,6 +1029,13 @@ namespace INI
 			_fileOutputPath = szFilename;
 
 			return store( uiStoreMode );
+		}
+
+		/**
+		 * Removes all parsed data.
+		 */
+		void clean()
+		{
 		}
 
 		/**
@@ -1079,9 +1143,15 @@ namespace Sorting
 	// https://stackoverflow.com/a/36703987
 	void quickSort( array<string> &inout strings, int start, int end )
 	{
+		int middle =  start + (end - start) / 2;
+
+		// index out of bound?
+		if( middle < 0 || middle >= int(strings.length()) )
+			return;
+
 		int i = start;
 		int j = end;
-		string pivot = strings[ start + (end - start) / 2 ];
+		string pivot = strings[ middle ];
 
 		while ( i <= j )
 		{
