@@ -627,6 +627,9 @@ namespace INI
 			// New section starting
 			if (linedata[0] == '[')
 			{
+				// Ignore rest of the text after first square bracket
+				linedata = linedata.SubString( 0, linedata.FindFirstOf("]") );
+
 				// Store section name without braces
 				linedata = linedata.Replace( "[", "" );
 				linedata = linedata.Replace( "]", "" );
