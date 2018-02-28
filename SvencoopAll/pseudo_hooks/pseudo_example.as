@@ -75,12 +75,14 @@ HookReturnCode TestPseudoClientUserInfoChanged( KeyValueBuffer@ pKVB, const stri
 	// Prevent non-"gordon" player model
 	if( szKey == "model" )
 	{
-		if( pKVB.GetValue("model") != "gordon" )
+		string szNewValue = pKVB.GetValue(szKey);
+		if( szNewValue != "gordon" )
 		{
 			CBasePlayer@ pPlayer = cast<CBasePlayer>( g_EntityFuncs.Instance( pKVB.GetClient() ) );
 
 			if( pPlayer !is null )
 			{
+				g_PlayerFuncs.ClientPrint( @pPlayer, HUD_PRINTCONSOLE, "OLD("+szOldValue+") NEW("+szNewValue+")\n" );
 				g_PlayerFuncs.ClientPrint( @pPlayer, HUD_PRINTCONSOLE, "Only model 'gordon' is allowed!\n" );
 
 				// Override!
