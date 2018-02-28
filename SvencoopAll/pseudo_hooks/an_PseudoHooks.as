@@ -233,7 +233,7 @@ final class CANModulePseudoHookManager : PseudoTakeDamage, PseudoClientUserInfoC
 	private bool ExecutePseudoHook( const uint id, uint &out ret, dictionary@ parameters )
 	{
 		ret = HOOK_CONTINUE;
-		uint total = 0;
+		uint total = 0, biggest = 0;
 		array<string> keys = m_dictHandler.getKeys();
 		string key, forward_name = string(id) + " @";
 
@@ -269,13 +269,21 @@ final class CANModulePseudoHookManager : PseudoTakeDamage, PseudoClientUserInfoC
 					else
 					if( id == Hooks::Pseudo::Player::ClientUserInfoChanged )
 					{
-						int rslt = PseudoClientUserInfoChanged_Execute( key, @handle, @parameters, ret );
+						uint rettemp;
+						int rslt = PseudoClientUserInfoChanged_Execute( key, @handle, @parameters, rettemp );
 
 						if( rslt == PseudoHookExecute_False )
 							return false;
 						else
 						if( rslt == PseudoHookExecute_Continue )
 							continue;
+
+						if( biggest < rettemp )
+						{
+							biggest = rettemp;
+						}
+
+						ret = biggest;
 					}
 
 					total++;
