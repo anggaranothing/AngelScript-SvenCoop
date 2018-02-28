@@ -67,9 +67,16 @@ mixin class PseudoClientUserInfoChanged
 			return PseudoHookRegister_False;
 		}
 
-		// OK, insert new key to listen here...
-		if( !dictOldUserInfo.exists(keyvalue) )
-			dictOldUserInfo.set( keyvalue , @array<string>(g_Engine.maxClients+1,string()) );
+		// Support for multiple values
+		array<string> values = keyvalue.Split(";");
+		for( uint i = 0; i < values.length; i++ )
+		{
+			keyvalue = values[i];
+
+			// OK, insert new key to listen here...
+			if( !dictOldUserInfo.exists(keyvalue) )
+				dictOldUserInfo.set( keyvalue , @array<string>(g_Engine.maxClients+1,string()) );
+		}
 
 		return PseudoHookRegister_True;
 	}

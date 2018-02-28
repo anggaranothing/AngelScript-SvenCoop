@@ -162,7 +162,7 @@ final class CANModulePseudoHookManager : PseudoTakeDamage, PseudoClientUserInfoC
 	}
 
 	/**
-	 * Removes all functions hooked into the given hook.
+	 * Removes a hook.
 	 *
 	 * @param id		Hook ID.
 	 * @param key		Hook unique register key.
@@ -294,5 +294,14 @@ final class CANModulePseudoHookManager : PseudoTakeDamage, PseudoClientUserInfoC
 		//g_Log.PrintF( "(ExecutePseudoHook) %1 total( %2 )\n", id, total );
 
 		return true;
+	}
+
+	private void RemoveSchedule( CScheduledFunction@ pSched )
+	{
+		if( pSched !is null )
+		{
+			g_Scheduler.RemoveTimer( pSched );
+			@pSched = null;
+		}
 	}
 }
